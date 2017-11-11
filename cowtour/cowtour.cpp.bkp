@@ -1,0 +1,115 @@
+
+/*
+ID: heng_li1
+TASK: cowtour
+LANG: C++11                 
+*/
+/* LANG can be C++11 or C++14 for those more recent releases */
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <limits>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <utility>
+
+using namespace std;
+typedef pair<int,int> PII;
+typedef vector<int> VI;
+typedef vector<VI> VVI;
+typedef vector<double> VD;
+typedef vector<VD> VVD;
+
+double inf = numeric_limits<double>::infinity();
+
+
+double dist(PII &a, PII &b) {
+	return sqrt(pow(b.first-a.first, 2)+pow(b.second-a.second, 2));
+}
+
+void FW(VVD &G, int n) {
+	int i,j,k;
+	for (k=0;k<n;k++) {
+		for (i=0;i<n;i++) {
+			for(j=0;j<n;j++) {
+				G[i][j] = min(G[i][j], G[i][k]+G[k][j]);
+			}
+		}
+	}
+}
+
+int main() {
+    FILE* fout = fopen("cowtour.out","w");
+    ifstream fin ("cowtour.in");
+    int n;
+    fin >> n;
+
+    vector <PII> locs(n);
+
+    for (PII &p: locs) {
+    	fin >> p.first >> p.second;
+    }
+
+    char adj;
+
+    VVD G(n, VD(n,inf));
+
+    int i =0,j;
+    for (VD &row: G) {
+    	j =0;
+    	for (double &d: row) {
+    		fin >> adj;
+
+    		// cerr << adj;
+    		
+    		if (i==j) {
+    			d = 0;
+    		}
+
+    		else if(adj!='0') {
+    			d = dist(locs[i],locs[j]);
+    		}
+    		// cerr << i << " " << j << " " << G[i][j] << endl;
+    		j++;
+    	}
+    	i++;
+    }
+
+    // cerr << endl;
+
+    FW(G,n);
+
+    double res = inf;
+
+    VD maxdist (n,0.0);
+
+    for (int i =0;i<n;++i) {
+    	for (int j =0; j<n;++j) {
+    		if (i!=j && G[i][j]<inf) {
+    			// cerr << i << " " << j << " " << G[i][j] << endl;
+    			maxdist[i] = max(maxdist[i],G[i][j]);
+    		}
+    	}
+    }
+
+    for (int i =0;i<n;i++) {
+    	for(int j =0;j<n;j++) {
+    		if (G[i][j]==inf) {
+    			double dst = maxdist[i]+maxdist[j]+dist(locs[i],locs[j]);
+    			res = min(res,dst);
+    		}
+    	}
+    }
+
+    for (int i =0;i<n;++i) {
+    	res = max(res,maxdist[i]);
+    }
+
+    fprintf(fout,"%.6f\n", res);
+
+
+    fclose(fout);
+    return 0;
+}
